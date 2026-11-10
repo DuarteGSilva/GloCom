@@ -111,3 +111,69 @@ Due to the numerical sensitivity of bi-level dual formulations in large MILP pro
 | `MIPFocus` | `1` | Prioritizes finding feasible solutions over proving optimality. |
 | `Presolve` | `2` | Aggressive presolve to prune search space and reduce memory footprint. |
 | `BarHomogeneous` | `1` | Improves numerical stability for interior point algorithms. |
+
+## Test Example
+
+A tiny AI-generated example is provided. It runs in seconds, needs no real genomes, and has a known answer, so you can check that your Gurobi/CarveMe/cobra installation and GloCom behave as expected before running real data. This example was verified and runs as intended given the instructions are followed correctly.
+
+### What is available for this test
+
+```text
+glocom/
+├── other files ...
+├── run.py                  # Builds the experiments and runs GloCom    <-- run this file
+├── universal_model.json    # Test reaction database (4 reactions)
+└── models/OrgA.xml         # Test single-organism SBML model
+```
+
+A DIAMOND file containing the scores is not provided, so standard constant scores are used instead of the more complex scoring functions.
+
+### The test organism
+
+`OrgA` has a simplified network (shared extracellular metabolites end in `_e`, internal ones in `_c`):
+
+| Reaction | What it does | Role in the example |
+| :--- | :--- | :--- |
+| `GLCt` | `glc_e -> glc_c` | Glucose uptake |
+| `GLYC` | `glc_c + 2 adp_c -> 2 atp_c + 2 pyr_c` | Lumped glycolysis; makes ATP and biomass precursor |
+| `XYLt` | `xyl_e -> xyl_c` | Xylose uptake, but `xyl_c` is a **dead end** |
+| `ACEG` | `ace_e -> glc_c` | **Spurious** reaction (wrongly annotated); lets OrgA eat acetate |
+| `ATPM` | `atp_c -> adp_c` | ATP maintenance (GloCom enforces a minimum flux of 8.39 when OrgA must grow) |
+| `Growth` | `4 pyr_c + atp_c -> adp_c` | Biomass reaction |
+
+The test database (`universal_model.json`) offers four candidate additions: `XYL2GLC` (`xyl_c -> glc_c`, the correct fix), `XYL2XUL` + `XUL2GLC` (a two-step bypass that also works but costs two additions), and `GLC2FRU` (an irrelevant decoy).
+
+### The made-up experiments
+
+| Experiment | Medium (max uptake) | Observed OrgA phenotype | Unmodified model | Why it conflicts |
+| :--- | :--- | :--- | :--- | :--- |
+| 0 | glucose (10) | Growth | Grows | No conflict; it protects the glucose pathway from being removed |
+| 1 | xylose (10) | Growth | No growth | Xylose is a dead end, so a reaction must be **added** |
+| 2 | acetate (10) | No growth | Grows (through `ACEG`) | The spurious reaction must be **removed** |
+
+### How to run
+
+```bash
+python run.py
+```
+
+Logs go to the console and to `glocom.log`. Because `EXPORT_PROBLEM = True`, `glocom_debug.mps` and `glocom_debug.lp` are also written.
+
+### Expected result
+
+GloCom should suggest exactly two changes and nothing else:
+
+```text
+>> Problem value: 7.0 (optimal)
+> Modifications:
+ [+] ADDED Database Reaction: OrgA#DB#XYL2GLC
+ [-] REMOVED Model Reaction: OrgA#ACEG
+...
+[PASS] ADD perfectly matched: {'OrgA#DB#XYL2GLC'}
+[PASS] REM perfectly matched: {'OrgA#ACEG'}
+>>> TEST RESULT: SUCCESS <<<
+```
+
+`run.py` exits with code 0 on success and 1 otherwise. No experiment should be excluded, no reaction reversed.
+
+The objective is 7.0 because, with the default weights, one database addition costs 4 (`W_ADD_RX`) and one removal costs 3 (`W_REM_RX`). This is the unique cheapest solution: the two-step bypass would cost 8 for the additions alone, and excluding an experiment costs 200.
