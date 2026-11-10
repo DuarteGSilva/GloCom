@@ -1,0 +1,106 @@
+{
+  "id": "toy_universal",
+  "name": "Toy universal reaction database",
+  "version": "1",
+  "compartments": {
+    "C_c": "cytosol",
+    "C_e": "extracellular space"
+  },
+  "metabolites": [
+    {
+      "id": "xyl_c",
+      "name": "Xylose",
+      "compartment": "C_c",
+      "formula": "",
+      "charge": 0,
+      "annotation": {},
+      "notes": {}
+    },
+    {
+      "id": "glc_c",
+      "name": "Glucose",
+      "compartment": "C_c",
+      "formula": "",
+      "charge": 0,
+      "annotation": {},
+      "notes": {}
+    },
+    {
+      "id": "xul_c",
+      "name": "Xylulose (toy intermediate)",
+      "compartment": "C_c",
+      "formula": "",
+      "charge": 0,
+      "annotation": {},
+      "notes": {}
+    },
+    {
+      "id": "fru_c",
+      "name": "Fructose",
+      "compartment": "C_c",
+      "formula": "",
+      "charge": 0,
+      "annotation": {},
+      "notes": {}
+    }
+  ],
+  "reactions": [
+    {
+      "id": "XYL2GLC",
+      "name": "Xylose to glucose (correct fix)",
+      "metabolites": {
+        "xyl_c": -1,
+        "glc_c": 1
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": "",
+      "subsystem": "",
+      "annotation": {},
+      "notes": {}
+    },
+    {
+      "id": "XYL2XUL",
+      "name": "Xylose to xylulose (step 1 of bypass)",
+      "metabolites": {
+        "xyl_c": -1,
+        "xul_c": 1
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": "",
+      "subsystem": "",
+      "annotation": {},
+      "notes": {}
+    },
+    {
+      "id": "XUL2GLC",
+      "name": "Xylulose to glucose (step 2 of bypass)",
+      "metabolites": {
+        "xul_c": -1,
+        "glc_c": 1
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": "",
+      "subsystem": "",
+      "annotation": {},
+      "notes": {}
+    },
+    {
+      "id": "GLC2FRU",
+      "name": "Glucose to fructose (irrelevant decoy)",
+      "metabolites": {
+        "glc_c": -1,
+        "fru_c": 1
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": "",
+      "subsystem": "",
+      "annotation": {},
+      "notes": {}
+    }
+  ],
+  "genes": []
+}
