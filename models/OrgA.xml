@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" xmlns:fbc="http://www.sbml.org/sbml/level3/version1/fbc/version2" level="3" version="1" fbc:required="false">
+  <model id="OrgA" name="OrgA toy model" fbc:strict="true">
+    <listOfCompartments>
+      <compartment id="C_c" name="cytosol" constant="true"/>
+      <compartment id="C_e" name="extracellular space" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="M_glc_e" name="Glucose (extracellular)" compartment="C_e" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="M_xyl_e" name="Xylose (extracellular)" compartment="C_e" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="M_ace_e" name="Acetate (extracellular)" compartment="C_e" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="M_glc_c" name="Glucose (cytosol)" compartment="C_c" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="M_xyl_c" name="Xylose (cytosol)" compartment="C_c" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="M_atp_c" name="ATP" compartment="C_c" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="M_adp_c" name="ADP" compartment="C_c" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="M_pyr_c" name="Biomass precursor (pyruvate-like)" compartment="C_c" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="LB_m10" value="-10" constant="true"/>
+      <parameter id="LB_0" value="0" constant="true"/>
+      <parameter id="UB_1000" value="1000" constant="true"/>
+    </listOfParameters>
+    <fbc:listOfObjectives fbc:activeObjective="obj">
+      <fbc:objective fbc:id="obj" fbc:type="maximize">
+        <fbc:listOfFluxObjectives>
+          <fbc:fluxObjective fbc:reaction="R_Growth" fbc:coefficient="1"/>
+        </fbc:listOfFluxObjectives>
+      </fbc:objective>
+    </fbc:listOfObjectives>
+    <listOfReactions>
+      <reaction id="R_EX_glc_e" name="Glucose exchange" reversible="true" fast="false" fbc:lowerFluxBound="LB_m10" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_glc_e" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+      </reaction>
+      <reaction id="R_EX_xyl_e" name="Xylose exchange" reversible="true" fast="false" fbc:lowerFluxBound="LB_m10" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_xyl_e" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+      </reaction>
+      <reaction id="R_EX_ace_e" name="Acetate exchange" reversible="true" fast="false" fbc:lowerFluxBound="LB_m10" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_ace_e" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+      </reaction>
+      <reaction id="R_GLCt" name="Glucose uptake" reversible="false" fast="false" fbc:lowerFluxBound="LB_0" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_glc_e" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_glc_c" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="R_XYLt" name="Xylose uptake (xylose is a dead end: no downstream reaction)" reversible="false" fast="false" fbc:lowerFluxBound="LB_0" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_xyl_e" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_xyl_c" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="R_ACEG" name="SPURIOUS acetate-to-glucose reaction (wrong annotation)" reversible="false" fast="false" fbc:lowerFluxBound="LB_0" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_ace_e" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_glc_c" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="R_GLYC" name="Lumped glycolysis" reversible="false" fast="false" fbc:lowerFluxBound="LB_0" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_glc_c" stoichiometry="1" constant="true"/>
+          <speciesReference species="M_adp_c" stoichiometry="2" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_atp_c" stoichiometry="2" constant="true"/>
+          <speciesReference species="M_pyr_c" stoichiometry="2" constant="true"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="R_ATPM" name="ATP maintenance" reversible="false" fast="false" fbc:lowerFluxBound="LB_0" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="R_Growth" name="Biomass reaction" reversible="false" fast="false" fbc:lowerFluxBound="LB_0" fbc:upperFluxBound="UB_1000">
+        <listOfReactants>
+          <speciesReference species="M_pyr_c" stoichiometry="4" constant="true"/>
+          <speciesReference species="M_atp_c" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="M_adp_c" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
